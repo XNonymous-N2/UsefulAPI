@@ -44,6 +44,8 @@ jobs:
       with:
           distribution: 'adopt'
           java-version: '16'
+    - name: Build and test project
+      run: mvn -B verify
     - name: files
       run: ls -R
     - uses: "marvinpinto/action-automatic-releases@latest"
