@@ -1,32 +1,42 @@
 package de.xnonymous.usefulapi.paper;
 
 import de.xnonymous.usefulapi.UsefulAPI;
+import de.xnonymous.usefulapi.paper.command.Command;
 import de.xnonymous.usefulapi.paper.command.CommandRegistry;
 import de.xnonymous.usefulapi.paper.config.ConfigRegistry;
-import de.xnonymous.usefulapi.paper.config.impl.DataConfig;
 import de.xnonymous.usefulapi.paper.npc.NPC;
 import de.xnonymous.usefulapi.paper.npc.NPCManager;
 import de.xnonymous.usefulapi.paper.util.ItemBuilder;
 import de.xnonymous.usefulapi.util.Checks;
 import lombok.Getter;
-import lombok.NonNull;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.reflections.Reflections;
 import redis.clients.jedis.JedisPubSub;
+
+import java.util.Set;
+
+import static org.reflections.scanners.Scanners.SubTypes;
 
 @SuperBuilder
 @Getter
 public class PaperUsefulAPI extends UsefulAPI {
 
-    @NonNull
+    @Setter
     public JavaPlugin plugin;
     private NPCManager npcManager;
     private String commandPackage;
+    private String listenerPackage;
     private CommandRegistry commandRegistry;
     private ConfigRegistry configRegistry;
 
     @Override
+    @SneakyThrows
     public void startBeingUseful() {
         super.startBeingUseful();
 
@@ -34,6 +44,14 @@ public class PaperUsefulAPI extends UsefulAPI {
 
         if (Checks.isNotEmpty(commandPackage))
             commandRegistry = new CommandRegistry(this, commandPackage);
+        if (Checks.isNotEmpty(listenerPackage)) {
+            Reflections reflections = new Reflections(listenerPackage);
+            Set<Class<?>> classes = reflections.get(SubTypes.of(Listener.class).asClass());
+
+            for (Class<?> aClass : classes) {
+                Bukkit.getPluginManager().registerEvents((Listener) aClass.getDeclaredConstructor().newInstance(), plugin);
+            }
+        }
 
     }
 

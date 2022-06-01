@@ -3,6 +3,7 @@ package de.xnonymous.usefulapi;
 import de.xnonymous.api.mysql.MySQL;
 import de.xnonymous.usefulapi.util.Checks;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.bukkit.Warning;
 import redis.clients.jedis.Jedis;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 @Getter
 public class UsefulAPI {
 
+    @Setter
     private Consumer<String> log;
     private MySQL mySQL;
     private String mySQLHost;
