@@ -1,0 +1,1 @@
+[![](https://jitpack.io/v/XNonymous-N2/UsefulAPI.svg)](https://jitpack.io/#XNonymous-N2/UsefulAPI)
