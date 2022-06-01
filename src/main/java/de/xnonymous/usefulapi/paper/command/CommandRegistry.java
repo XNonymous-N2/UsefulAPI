@@ -49,7 +49,8 @@ public class CommandRegistry extends NameableRegistry<Command> {
                         return false;
                     }
 
-                    if (commandSender instanceof Player player) {
+                    if (commandSender instanceof Player) {
+                        Player player = (Player) commandSender;
                         UUID uniqueId = player.getUniqueId();
 
                         if (command.getCooldown() != 0) {
