@@ -33,7 +33,7 @@ public class CommandRegistry extends NameableRegistry<Command> {
         Set<Class<?>> classes = reflections.get(SubTypes.of(Command.class).asClass());
 
         for (Class<?> aClass : classes) {
-            register((Command) aClass.getDeclaredConstructor().newInstance(usefulAPI));
+            register((Command) aClass.getDeclaredConstructor(PaperUsefulAPI.class).newInstance(usefulAPI));
         }
 
         Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");

@@ -61,7 +61,7 @@ public class UsefulAPI {
     }
 
     public void onDisable() {
-        if (useRedis)
+        if (useRedis != null && useRedis)
             jedisPool.destroy();
         if (mySQL != null)
             mySQL.disconnect();
