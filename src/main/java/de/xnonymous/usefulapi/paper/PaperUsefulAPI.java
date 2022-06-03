@@ -34,6 +34,10 @@ public class PaperUsefulAPI extends UsefulAPI {
     private String listenerPackage;
     private CommandRegistry commandRegistry;
     private ConfigRegistry configRegistry;
+    private String commandNoPermMessage;
+    private String commandCooldownMessage;
+    private String commandNoPlayerMessage;
+    private String commandSyntaxMessage;
 
     @Override
     @SneakyThrows
@@ -43,7 +47,7 @@ public class PaperUsefulAPI extends UsefulAPI {
         configRegistry = new ConfigRegistry(this);
 
         if (Checks.isNotEmpty(commandPackage))
-            commandRegistry = new CommandRegistry(this, commandPackage);
+            commandRegistry = new CommandRegistry(this, commandPackage, commandNoPermMessage, commandCooldownMessage, commandNoPlayerMessage, commandSyntaxMessage);
         if (Checks.isNotEmpty(listenerPackage)) {
             Reflections reflections = new Reflections(listenerPackage);
             Set<Class<?>> classes = reflections.get(SubTypes.of(Listener.class).asClass());

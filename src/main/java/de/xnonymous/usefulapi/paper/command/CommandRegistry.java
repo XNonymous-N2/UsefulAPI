@@ -27,10 +27,10 @@ public class CommandRegistry extends NameableRegistry<Command> {
     private final ArrayList<Cooldown> cooldowns = new ArrayList<>();
 
     @SneakyThrows
-    public CommandRegistry(PaperUsefulAPI usefulAPI, String where) {
+    public CommandRegistry(PaperUsefulAPI usefulAPI, String where, String noPerm, String cooldown, String noPlayer, String syntax) {
         JavaPlugin instance = usefulAPI.getPlugin();
         Reflections reflections = new Reflections(where);
-        Set<Class<?>> classes = reflections.get(SubTypes.of(Command.class).asClass());
+        Set<Class<? extends Command>> classes = reflections.getSubTypesOf(Command.class);
 
         for (Class<?> aClass : classes) {
             register((Command) aClass.getConstructor(PaperUsefulAPI.class).newInstance(usefulAPI));
@@ -45,7 +45,7 @@ public class CommandRegistry extends NameableRegistry<Command> {
                 public boolean execute(CommandSender commandSender, @NotNull String s, String[] strings) {
 
                     if (!commandSender.hasPermission(instance.getName().toLowerCase() + ".command." + command.getName().toLowerCase())) {
-                        sendMessage(usefulAPI, commandSender, "§cDu hast keine Berechtigung diesen Befehl auszuführen!");
+                        sendMessage(usefulAPI, commandSender, noPerm == null ? "§cDu hast keine Berechtigung diesen Befehl auszuführen!" : noPerm);
                         return false;
                     }
 
@@ -68,19 +68,19 @@ public class CommandRegistry extends NameableRegistry<Command> {
                                                                 cooldown.getIdentify().equals(command.getName())),
                                                 20L * command.getCooldown());
                             } else {
-                                sendMessage(usefulAPI, commandSender, "§cDu kannst diesen Befehl erst in §4" + cooldown1.howLong() + " §cSekunden wieder benutzen!");
+                                sendMessage(usefulAPI, commandSender, cooldown == null ? "§cDu kannst diesen Befehl erst in §4" + cooldown1.howLong() + " §cSekunden wieder benutzen!" : cooldown.replace("%left%", String.valueOf(cooldown1.howLong())));
                                 return false;
                             }
                         }
                     }
 
                     if (!(commandSender instanceof Player) && !command.isConsole()) {
-                        sendMessage(usefulAPI, commandSender, "§cDieser Befehl ist nur für Spieler!");
+                        sendMessage(usefulAPI, commandSender, noPlayer == null ? "§cDieser Befehl ist nur für Spieler!" : noPlayer);
                         return false;
                     }
 
                     if (!command.onExecute(commandSender, strings)) {
-                        sendMessage(usefulAPI, commandSender, "§7Bitte benutze: §e%syntax%".replaceAll("%syntax%", "/" + command.getName().toLowerCase() + " " + command.getSyntax()));
+                        sendMessage(usefulAPI, commandSender, (syntax == null ? "§7Bitte benutze: §e%syntax%" : syntax).replaceAll("%syntax%", "/" + command.getName().toLowerCase() + " " + command.getSyntax()));
                         return false;
                     }
 
