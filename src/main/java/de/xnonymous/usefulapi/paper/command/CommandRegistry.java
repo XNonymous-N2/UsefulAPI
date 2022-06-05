@@ -2,6 +2,7 @@ package de.xnonymous.usefulapi.paper.command;
 
 import de.xnonymous.usefulapi.paper.PaperUsefulAPI;
 import de.xnonymous.usefulapi.paper.util.ChatUtil;
+import de.xnonymous.usefulapi.paper.util.ConsumerUtil;
 import de.xnonymous.usefulapi.structure.NameableRegistry;
 import de.xnonymous.usefulapi.util.Cooldown;
 import lombok.SneakyThrows;
@@ -19,15 +20,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
-
-import static org.reflections.scanners.Scanners.SubTypes;
+import java.util.function.Consumer;
 
 public class CommandRegistry extends NameableRegistry<Command> {
 
     private final ArrayList<Cooldown> cooldowns = new ArrayList<>();
 
     @SneakyThrows
-    public CommandRegistry(PaperUsefulAPI usefulAPI, String where, String noPerm, String cooldown, String noPlayer, String syntax) {
+    public CommandRegistry(PaperUsefulAPI usefulAPI, String where, Consumer<ConsumerUtil> noPerm, Consumer<ConsumerUtil> cooldown, Consumer<ConsumerUtil> noPlayer, Consumer<ConsumerUtil> syntax) {
         JavaPlugin instance = usefulAPI.getPlugin();
         Reflections reflections = new Reflections(where);
         Set<Class<? extends Command>> classes = reflections.getSubTypesOf(Command.class);
@@ -40,12 +40,15 @@ public class CommandRegistry extends NameableRegistry<Command> {
         bukkitCommandMap.setAccessible(true);
         CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
         getObjects().forEach(command -> {
+            String perm = instance.getName().toLowerCase() + ".command." + command.getName().toLowerCase();
             BukkitCommand bukkitCommand = new BukkitCommand(command.getName()) {
                 @Override
                 public boolean execute(CommandSender commandSender, @NotNull String s, String[] strings) {
 
-                    if (!commandSender.hasPermission(instance.getName().toLowerCase() + ".command." + command.getName().toLowerCase())) {
-                        sendMessage(usefulAPI, commandSender, noPerm == null ? "§cDu hast keine Berechtigung diesen Befehl auszuführen!" : noPerm);
+                    if (!commandSender.hasPermission(perm)) {
+                        if (noPerm == null)
+                            sendMessage(usefulAPI, commandSender, "§cDu hast keine Berechtigung diesen Befehl auszuführen!");
+                        else noPerm.accept(new ConsumerUtil(commandSender, perm));
                         return false;
                     }
 
@@ -68,19 +71,26 @@ public class CommandRegistry extends NameableRegistry<Command> {
                                                                 cooldown.getIdentify().equals(command.getName())),
                                                 20L * command.getCooldown());
                             } else {
-                                sendMessage(usefulAPI, commandSender, cooldown == null ? "§cDu kannst diesen Befehl erst in §4" + cooldown1.howLong() + " §cSekunden wieder benutzen!" : cooldown.replace("%left%", String.valueOf(cooldown1.howLong())));
+                                if (cooldown == null)
+                                    sendMessage(usefulAPI, commandSender, "§cDu kannst diesen Befehl erst in §4" + cooldown1.howLong() + " §cSekunden wieder benutzen!");
+                                else cooldown.accept(new ConsumerUtil(commandSender, cooldown1.howLong()));
                                 return false;
                             }
                         }
                     }
 
                     if (!(commandSender instanceof Player) && !command.isConsole()) {
-                        sendMessage(usefulAPI, commandSender, noPlayer == null ? "§cDieser Befehl ist nur für Spieler!" : noPlayer);
+                        if (noPlayer == null)
+                            sendMessage(usefulAPI, commandSender, "§cDieser Befehl ist nur für Spieler!");
+                        else noPlayer.accept(new ConsumerUtil(commandSender, null));
                         return false;
                     }
 
                     if (!command.onExecute(commandSender, strings)) {
-                        sendMessage(usefulAPI, commandSender, (syntax == null ? "§7Bitte benutze: §e%syntax%" : syntax).replaceAll("%syntax%", "/" + command.getName().toLowerCase() + " " + command.getSyntax()));
+                        String syntax1 = "/" + command.getName().toLowerCase() + " " + command.getSyntax();
+                        if (syntax == null)
+                            sendMessage(usefulAPI, commandSender, "§7Bitte benutze: §e" + syntax1);
+                        else syntax.accept(new ConsumerUtil(commandSender, syntax1));
                         return false;
                     }
 
@@ -89,7 +99,7 @@ public class CommandRegistry extends NameableRegistry<Command> {
             };
             bukkitCommand.setDescription(command.getDescription());
             bukkitCommand.setUsage(command.getSyntax());
-            bukkitCommand.setPermission(instance.getName().toLowerCase() + ".command." + command.getName().toLowerCase());
+            bukkitCommand.setPermission(perm);
             bukkitCommand.setAliases(Arrays.asList(command.getAlias()));
 
             commandMap.register(instance.getName(), bukkitCommand);

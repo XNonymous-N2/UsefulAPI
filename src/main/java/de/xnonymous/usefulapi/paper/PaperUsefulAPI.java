@@ -7,6 +7,7 @@ import de.xnonymous.usefulapi.paper.config.ConfigRegistry;
 import de.xnonymous.usefulapi.paper.config.impl.DataConfig;
 import de.xnonymous.usefulapi.paper.npc.NPC;
 import de.xnonymous.usefulapi.paper.npc.NPCManager;
+import de.xnonymous.usefulapi.paper.util.ConsumerUtil;
 import de.xnonymous.usefulapi.paper.util.ItemBuilder;
 import de.xnonymous.usefulapi.util.Checks;
 import lombok.Getter;
@@ -15,12 +16,15 @@ import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 import redis.clients.jedis.JedisPubSub;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static org.reflections.scanners.Scanners.SubTypes;
 
@@ -36,10 +40,10 @@ public class PaperUsefulAPI extends UsefulAPI {
     @Getter
     private CommandRegistry commandRegistry;
     private ConfigRegistry configRegistry;
-    private String commandNoPermMessage;
-    private String commandCooldownMessage;
-    private String commandNoPlayerMessage;
-    private String commandSyntaxMessage;
+    private Consumer<ConsumerUtil> commandNoPermMessage;
+    private Consumer<ConsumerUtil> commandCooldownMessage;
+    private Consumer<ConsumerUtil> commandNoPlayerMessage;
+    private Consumer<ConsumerUtil> commandSyntaxMessage;
 
     @Override
     @SneakyThrows
