@@ -4,6 +4,7 @@ import de.xnonymous.usefulapi.UsefulAPI;
 import de.xnonymous.usefulapi.paper.command.Command;
 import de.xnonymous.usefulapi.paper.command.CommandRegistry;
 import de.xnonymous.usefulapi.paper.config.ConfigRegistry;
+import de.xnonymous.usefulapi.paper.config.impl.DataConfig;
 import de.xnonymous.usefulapi.paper.npc.NPC;
 import de.xnonymous.usefulapi.paper.npc.NPCManager;
 import de.xnonymous.usefulapi.paper.util.ItemBuilder;
@@ -32,6 +33,7 @@ public class PaperUsefulAPI extends UsefulAPI {
     private NPCManager npcManager;
     private String commandPackage;
     private String listenerPackage;
+    @Getter
     private CommandRegistry commandRegistry;
     private ConfigRegistry configRegistry;
     private String commandNoPermMessage;
@@ -88,4 +90,11 @@ public class PaperUsefulAPI extends UsefulAPI {
     public void redisSubscribe(JedisPubSub jedisPubSub, String... channels) {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> super.redisSubscribe(jedisPubSub, channels));
     }
+
+    public DataConfig getDataConfig() {
+        if (configRegistry == null)
+            return null;
+        return ((DataConfig) configRegistry.getByClass(DataConfig.class));
+    }
+
 }
