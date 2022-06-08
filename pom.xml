@@ -6,7 +6,7 @@
 
     <groupId>de.xnonymous</groupId>
     <artifactId>UsefulAPI</artifactId>
-    <version>1.8</version>
+    <version>1.9</version>
     <packaging>jar</packaging>
 
     <name>UsefulAPI</name>
@@ -85,6 +85,7 @@
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
             <version>4.8.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.xnonymous-n2</groupId>
